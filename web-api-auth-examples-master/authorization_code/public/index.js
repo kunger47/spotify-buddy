@@ -14,7 +14,7 @@ function getHashParams() {
 
 function property(key){
     return function(x){
-        return x[key];
+        return x != null ? x[key] : null;
     }
 }
 
@@ -31,6 +31,14 @@ var oauthSource = document.getElementById('oauth-template').innerHTML,
     oauthPlaceholder = document.getElementById('oauth');
 
 var params = getHashParams();
+
+var playlists = [];         // Array of users playlists
+var playlistTrackLinks = [];// Array of playlist track hrefs and totals
+var playlistTracks = [];    // Array of playlist tracks (.track to get the full track)
+var tracks = [];            // Array of all user tracks
+var albums = [];            // Array of all users albums (used for dates)
+var artists = [];           // Array of all users artists (used for genres)
+var genres = [];            // Array of genres
 
 var access_token = params.access_token,
     refresh_token = params.refresh_token,
@@ -63,43 +71,22 @@ if (error) {
             }
         });
 
+        //create a button to pull the users data
+        //allow them to select genres
+        //date (year, month, or day)
         $.ajax({
-            url: 'https://api.spotify.com/v1/me/playlists',
+            url: 'https://api.spotify.com/v1/me/playlists?limit=50',
             headers: {
                 'Authorization': 'Bearer ' + access_token
             },
             success: function(response) {
-                var playlists = response.items;
-                var playlistTracksApiLinks = playlists.map(property("tracks")).reduce(flatten,[]);
-                getTracksFromPlaylists(playlistTracksApiLinks);
+                playlists = response.items;
+                //can check the "total" property returned to check if there is more to get
+                playlistTrackLinks = playlists.map(property("tracks"));
+                // playlistTrackLinks = playlistTrackLinks.reduce(flatten,[]);
+                getTracksFromPlaylists();
             }
         });
-
-        function getTracksFromPlaylists(playlists) {
-            var allTracks = [];
-            var numList = 0
-            playlists.forEach(playlist => {
-                $.ajax({
-                    url: playlist.href,
-                    async: false,
-                    headers: {
-                        'Authorization': 'Bearer ' + access_token
-                    },
-                    success: function(response) {
-                        numList++;
-                        allTracks = allTracks.concat(response.items);
-                        if(numList == 20)
-                        {
-                            var tracksFlattend = allTracks.map(property("track")).reduce(flatten,[]);
-                            var tracksHtml = tracksFlattend.map(function (track) {
-                                return userPlaylistsTemplate(track);
-                            }).join('');
-                            userPlaylistsPlaceholder.innerHTML = tracksHtml;
-                        }
-                    }
-                });
-            });
-        }
     } else {
         // render initial screen
         $('#login').show();
@@ -120,4 +107,56 @@ if (error) {
             });
         });
     }, false);
+}
+
+function getTracksFromPlaylists() 
+{
+    addPlaylistsTracksToList(0);
+}
+
+function addPlaylistsTracksToList(playlistIdx)
+{
+    getPlaylistTracksFromOffset(playlistIdx, playlistTrackLinks[playlistIdx], 0);
+}
+
+function getPlaylistTracksFromOffset(playlistIdx, playlistTrackLink, offset)
+{
+    $.ajax({
+        url: playlistTrackLink.href + '?offset=' + offset,
+        // need to embrace async? - it is async now... but not really
+        headers: {
+            'Authorization': 'Bearer ' + access_token
+        },
+        success: function(response) {
+            playlistTracks = playlistTracks.concat(response.items);
+            if(offset + 100 < playlistTrackLink.total){
+                var newOffset = offset + 100;
+                getPlaylistTracksFromOffset(playlistIdx, playlistTrackLink, newOffset);
+            }
+            else {
+                if(playlistIdx < playlistTrackLinks.length - 1)
+                    addPlaylistsTracksToList(playlistIdx + 1);
+                else
+                    processTrackData();
+            }
+        }
+    });
+}
+
+function processTrackData(){
+    tracks = playlistTracks.map(property("track")).reduce(flatten,[]).filter((el) => { return el != null });
+
+    albums = tracks.map(property("album")).reduce(flatten,[]);
+    artists = albums.map(property("artists")).reduce(flatten,[]);
+    // Need to call the hrefs of these to get the genres
+
+    var tracksFromThe70s = tracks.filter((t) => 
+        {
+            var releaseDate = t.album.release_date;
+            return releaseDate != null ? releaseDate.substring(0, 3) == "197" : false;
+        });
+    var tracksHtml = tracksFromThe70s.map(function (track) {
+        return userPlaylistsTemplate(track);
+    }).join('');
+    userPlaylistsPlaceholder.innerHTML = tracksHtml;
 }

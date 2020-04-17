@@ -3,17 +3,7 @@
   <head>
     <title>Spotify Buddy</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <style type="text/css">
-      #login, #loggedin {
-        display: none;
-      }
-      .text-overflow {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 500px;
-      }
-    </style>
+    <link rel="stylesheet" href="styles/index.css">
   </head>
 
   <body>
@@ -54,11 +44,11 @@
     </script>
 
     <script id="user-playlists-template" type="text/x-handlebars-template">
-      <!-- <h3>{{name}}</h3> -->
+      <h3>{{name}}</h3>
       <!-- <div class="pull-left"> -->
         <span>
-        <img width="150" src="{{album.images.0.url}}" />
-        <span></span>
+          <img width="50" src="{{album.images.0.url}}" />
+        </span>
       <!-- </div> -->
     </script>
 
