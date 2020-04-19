@@ -44,9 +44,13 @@ var access_token = params.access_token,
     refresh_token = params.refresh_token,
     error = params.error;
 
-var userPlaylistsSource = document.getElementById('user-playlists-template').innerHTML,
-    userPlaylistsTemplate = Handlebars.compile(userPlaylistsSource),
-    userPlaylistsPlaceholder = document.getElementById('user-playlists');
+var resultingTracksSource = document.getElementById('resulting-tracks-template').innerHTML,
+    resultingTracksTemplate = Handlebars.compile(resultingTracksSource),
+    resultingTracksPlaceholder = document.getElementById('resulting-tracks');
+
+var songCountSource = document.getElementById('song-count-template').innerHTML,
+    songCountTemplate = Handlebars.compile(songCountSource),
+    songCountPlaceholder = document.getElementById('song-count');
 
 if (error) {
     alert('There was an error during the authentication');
@@ -71,11 +75,9 @@ if (error) {
             }
         });
 
-        //create a button to pull the users data
-        //allow them to select genres
-        //date (year, month, or day)
         $.ajax({
-            url: 'https://api.spotify.com/v1/me/playlists?limit=50',
+            url: 'https://api.spotify.com/v1/me/playlists?limit=5',
+            // url: 'https://api.spotify.com/v1/me/playlists?limit=50&offset=50',
             headers: {
                 'Authorization': 'Bearer ' + access_token
             },
@@ -106,6 +108,63 @@ if (error) {
             refresh_token: refresh_token
             });
         });
+    }, false);
+
+    document.getElementById('filter-by-date').addEventListener('click', function() {
+        var year = document.getElementById("year").value;
+        var month = document.getElementById("month").value;
+        var day = document.getElementById("day").value;
+
+        var tracksFromBirthYear = tracks;
+        if(year != "" && year.length == 4)
+        {
+            tracksFromBirthYear = tracksFromBirthYear.filter((t) => 
+            {
+                var releaseDate = t.album.release_date;
+                return releaseDate != null ? releaseDate.substring(0, 4) == year : false;
+            });
+        }
+        if(month != "" && month.length == 2)
+        {
+            tracksFromBirthYear = tracksFromBirthYear.filter((t) => 
+            {
+                var releaseDate = t.album.release_date; 1995-01-01
+                return releaseDate != null ? releaseDate.substring(5, 7) == month : false;
+            });
+        }
+        if(day != "" && day.length == 2)
+        {
+            tracksFromBirthYear = tracksFromBirthYear.filter((t) => 
+            {
+                var releaseDate = t.album.release_date;
+                return releaseDate != null ? releaseDate.substring(8, 10) == day : false;
+            });
+        }
+
+        var tracksHtml = tracksFromBirthYear.map(function (track) {
+            return resultingTracksTemplate(track);
+        }).join('');
+        setSongCount(tracksFromBirthYear.length);
+        resultingTracksPlaceholder.innerHTML = tracksHtml;
+    }, false);
+
+    document.getElementById('filter-by-num-of-artists').addEventListener('click', function() {
+        var NumOfArtists = parseInt(document.getElementById("NumOfArtists").value);
+
+        if(NumOfArtists != undefined)
+        {
+            var tracksWithGivenNumOfArtists = tracks.filter((t) => 
+            {
+                var trackArtists = t.artists;
+                return trackArtists != null ? trackArtists.length == NumOfArtists : false;
+            });
+
+            var tracksHtml = tracksWithGivenNumOfArtists.map(function (track) {
+                return resultingTracksTemplate(track);
+            }).join('');
+            setSongCount(tracksWithGivenNumOfArtists.length);
+            resultingTracksPlaceholder.innerHTML = tracksHtml;
+        }
     }, false);
 }
 
@@ -146,17 +205,20 @@ function getPlaylistTracksFromOffset(playlistIdx, playlistTrackLink, offset)
 function processTrackData(){
     tracks = playlistTracks.map(property("track")).reduce(flatten,[]).filter((el) => { return el != null });
 
+    tracks = Array.from(new Set(tracks.map(a => a.id)))
+        .map(id => {
+            return tracks.find(a => a.id === id)
+        });
+
     albums = tracks.map(property("album")).reduce(flatten,[]);
     artists = albums.map(property("artists")).reduce(flatten,[]);
     // Need to call the hrefs of these to get the genres
 
-    var tracksFromThe70s = tracks.filter((t) => 
-        {
-            var releaseDate = t.album.release_date;
-            return releaseDate != null ? releaseDate.substring(0, 3) == "197" : false;
-        });
-    var tracksHtml = tracksFromThe70s.map(function (track) {
-        return userPlaylistsTemplate(track);
-    }).join('');
-    userPlaylistsPlaceholder.innerHTML = tracksHtml;
+    setSongCount(tracks.length);
+}
+
+function setSongCount(trackCcount){
+    songCountPlaceholder.innerHTML = songCountTemplate({
+        count: trackCcount
+    });
 }

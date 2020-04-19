@@ -8,3 +8,19 @@
     white-space: nowrap;
     width: 500px;
   }
+
+.track {
+  text-align: center;
+  height: 170px;
+  display: inline-grid;
+  width: 150px;
+  outline: solid;
+  justify-items: center;
+  margin: 5px;
+  background: linear-gradient(45deg, black, transparent);
+}
+
+input, button {
+  margin: 8px;
+  margin-bottom: 8px !important;
+}
