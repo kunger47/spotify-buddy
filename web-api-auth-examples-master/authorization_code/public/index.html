@@ -13,11 +13,24 @@
         <a href="/login" class="btn btn-primary">Let's Do This</a>
       </div>
       <div id="loggedin">
-        <div id="user-profile">
-        </div>
-        <div id="oauth">
-        </div>
+        <div id="user-profile"></div>
+        <div id="oauth"></div>
+        <button class="btn btn-default" id="get_user_playlists">Get My Spotify Playlists</button>
+        <h3 id="playlist-count">Number of Playlists Found: </h3>
+        <div id="resulting-playlists"></div>
+        <button class="btn btn-default" id="get_user_songs">Get Songs from selected playlists</button>
+        <div id="song-count"></div>
         <div>
+          <form>
+            <fieldset>
+              <p>
+                  <label>Select Genre</label>
+                  <select id="genre-list">
+                    <option id="first-genre" value="1">(loading...)</option>
+                  </select>
+              </p>
+            </fieldset>
+          </form>
           <button class="btn btn-default" id="filter-by-date">Filter Songs By Date</button>
           <input id="year" placeholder="yyyy">
           <input id="month" placeholder="mm">
@@ -27,10 +40,7 @@
           <button class="btn btn-default" id="filter-by-num-of-artists">Filter Songs By Number of Artists</button>
           <input id="NumOfArtists" placeholder="#">
         </div>
-        <div id="song-count">
-        </div>
-        <div id="resulting-tracks">
-        </div>
+        <div id="resulting-tracks"></div>
         <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
       </div>
     </div>
@@ -66,10 +76,17 @@
       </div>
     </script>
 
+    <script id="resulting-playlists-template" type="text/x-handlebars-template">
+      <div id="{{id}}" class='playlist' onclick='removePlaylist(this)'> 
+        <p>{{name}}</p>
+        <img width="50" src="{{images.0.url}}" title="{{name}}" />
+      </div>
+    </script>
+
     <script id="oauth-template" type="text/x-handlebars-template">
       <h2>oAuth info</h2>
       <dl class="dl-horizontal">
-        <dt>Access token</dt><dd class="text-overflow">{{access_token}}</dd>
+        <dt>Access token</dt><dd id="access_token" class="text-overflow">{{access_token}}</dd>
         <dt>Refresh token</dt><dd class="text-overflow">{{refresh_token}}</dd>
       </dl>
     </script>
@@ -77,5 +94,6 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="index.js"></script>
+    <script src="songData.js"></script>
   </body>
 </html>
