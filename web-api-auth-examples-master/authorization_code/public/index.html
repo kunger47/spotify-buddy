@@ -21,16 +21,6 @@
         <button class="btn btn-default" id="get_user_songs">Get Songs from selected playlists</button>
         <div id="song-count"></div>
         <div>
-          <form>
-            <fieldset>
-              <p>
-                  <label>Select Genre</label>
-                  <select id="genre-list">
-                    <option id="first-genre" value="1">(loading...)</option>
-                  </select>
-              </p>
-            </fieldset>
-          </form>
           <button class="btn btn-default" id="filter-by-date">Filter Songs By Date</button>
           <input id="year" placeholder="yyyy">
           <input id="month" placeholder="mm">
@@ -39,6 +29,19 @@
         <div>
           <button class="btn btn-default" id="filter-by-num-of-artists">Filter Songs By Number of Artists</button>
           <input id="NumOfArtists" placeholder="#">
+        </div>
+        <div>
+          <button class="btn btn-default" id="filter-by-genre">Filter Songs By Selected Genre</button>
+          <form>
+            <fieldset>
+              <p>
+                <label>Select Genre</label>
+                <select id="genre-list">
+                  <option value="1">Select One...</option>
+                </select>
+              </p>
+            </fieldset>
+          </form>
         </div>
         <div id="resulting-tracks"></div>
         <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>

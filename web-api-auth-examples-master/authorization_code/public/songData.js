@@ -99,6 +99,31 @@ document.getElementById('filter-by-num-of-artists').addEventListener('click', fu
     }
 }, false);
 
+document.getElementById('filter-by-genre').addEventListener('click', function() {
+    //Need to be able to select Multiple genres?? ugh
+    var genreList = document.getElementById("genre-list");
+    var selectedGenre = genreList.options[genreList.selectedIndex];
+
+    if(selectedGenre != "1")
+    {
+        var tracksWithGivenGenre = tracks.filter((t) => 
+        {
+            //TODO: How do I best actaully filter these songs...
+            //Do I keep track and set the genre beforehand?
+            //Do I call the api again? 
+            //Check the playlist create api... I probably only need the id, so no need to keep the return form?!
+            var trackGenres = [selectedGenre];
+            return trackGenres != null ? trackGenres.includes(selectedGenre) : false;
+        });
+
+        setSongCount(tracksWithGivenGenre.length);
+        var tracksHtml = tracksWithGivenGenre.map(function (track) {
+            return resultingTracksTemplate(track);
+        }).join('');
+        resultingTracksPlaceholder.innerHTML = tracksHtml;
+    }
+}, false);
+
 function getPlaylistsForCurrentUser(offset)
 {
     var access_token = document.getElementById("access_token").innerText;
@@ -115,10 +140,6 @@ function getPlaylistsForCurrentUser(offset)
             else
             {
                 displayPlaylistData();
-                // Don't do this here, create a new button for after pulling in playlists
-                // playlistTrackLinks = playlists.map(property("tracks"));
-                // // playlistTrackLinks = playlistTrackLinks.reduce(flatten,[]);
-                // addPlaylistsTracksToList(0);
             }
         }
     });
@@ -212,8 +233,13 @@ function getGenresFromArtists(artistIdx)
                         return genres.find(g => g === gg)
                     });
 
-                document.getElementById("first-genre").value = genres[0];
-                document.getElementById("first-genre").text = genres[0];
+                var genreList = document.getElementById("genre-list");
+                genres.forEach((g) => {
+                    let option = document.createElement("option");
+                    option.text = g;
+                    option.value = g;
+                    genreList.options.add(option);
+                });
             }
         }
     });
