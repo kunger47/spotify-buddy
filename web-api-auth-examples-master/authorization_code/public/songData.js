@@ -170,26 +170,36 @@ document.getElementById('save-songs-to-playlist').addEventListener('click', func
             data: dataPackage,
             success: function(response) {
                 var playlistId = response.id;
-                var songsToAddUris = filteredSongs.map(property("uri")).slice(0, 20);
-
-                var songsToAddBody = {"uris": songsToAddUris};
-
-                $.ajax({
-                    type: 'POST',
-                    url: "https://api.spotify.com/v1/users/" + userId + "/playlists/" + playlistId + "/tracks",
-                    contentType: 'application/json',
-                    headers: {
-                        'Authorization': 'Bearer ' + access_token
-                    },
-                    data: JSON.stringify(songsToAddBody),
-                    success: function(response) {
-                        $('#saved-message').show();
-                    }
-                });
+                AddSongsToPlaylist(playlistId, 0);
             }
         });
     }
 }, false);
+
+function AddSongsToPlaylist(playlistId, offset){
+    var access_token = document.getElementById("access_token").innerText;
+    var userId = document.getElementById("user-id").innerText;
+    
+    var limit = offset + 100 > filteredSongs.length ? filteredSongs.length - offset : 100; 
+    var songsToAddUris = filteredSongs.map(property("uri")).slice(offset, offset + limit);
+    var songsToAddBody = {"uris": songsToAddUris};
+
+    $.ajax({
+        type: 'POST',
+        url: "https://api.spotify.com/v1/users/" + userId + "/playlists/" + playlistId + "/tracks",
+        contentType: 'application/json',
+        headers: {
+            'Authorization': 'Bearer ' + access_token
+        },
+        data: JSON.stringify(songsToAddBody),
+        success: function(response) {
+            if(limit == 100)
+                AddSongsToPlaylist(playlistId, offset + 100);
+            else
+                $('#saved-message').show();
+        }
+    });
+}
 
 function getPlaylistsForCurrentUser(offset)
 {
@@ -271,11 +281,9 @@ function processTrackData(){
 function getGenresFromArtists(artistIdx)
 {
     var access_token = document.getElementById("access_token").innerText;
-
     var urlFor50Artists = "https://api.spotify.com/v1/artists?ids=";
     var limit = artistIdx + 50 > artists.length ? artists.length - artistIdx : 50; 
-    var i;
-    for(i = artistIdx; i < artistIdx + limit; i++)
+    for(var i = artistIdx; i < artistIdx + limit; i++)
     {
         if(i != artistIdx)
             urlFor50Artists += ",";
