@@ -7,80 +7,114 @@
   </head>
 
   <body>
-    <div class="container">
+    <article>
+      <header>
+        Spotify Buddy
+      </header>
+
       <div id="login">
-        <h1>Please login to you Spotify Account to Begin.</h1>
-        <a href="/login" class="btn btn-primary">Let's Do This</a>
+        <a href="/login" id="login-btn" class="btn btn-primary search-btn">Let's Do This</a>
       </div>
+
       <div id="loggedin">
         <div id="user-profile"></div>
+
         <div id="oauth"></div>
-        <button class="btn btn-default" id="get_user_playlists">Get My Spotify Playlists</button>
-        <h3 id="playlist-count">Number of Playlists Found: </h3>
-        <div id="resulting-playlists"></div>
-        <button class="btn btn-default" id="get_user_songs">Get Songs from selected playlists</button>
-        <div id="song-count"></div>
-        <div>
-          <button class="btn btn-default" id="filter-by-date">Filter Songs By Date</button>
-          <input id="year" placeholder="yyyy">
-          <input id="month" placeholder="mm">
-          <input id="day" placeholder="dd">
+
+        <div id="get-playlists">
+          <button class="btn btn-default search-btn" id="get_user_playlists">Get Playlists</button>
+          <p id="playlist-count"></p>
+          <div id="resulting-playlists"></div>
         </div>
-        <div>
-          <button class="btn btn-default" id="filter-by-num-of-artists">Filter Songs By Number of Artists</button>
-          <input id="NumOfArtists" placeholder="#">
+
+        <div id="get-songs">
+          <button class="btn btn-default search-btn" id="get_user_songs">Get Songs</button>
+          <div id="song-count"></div>
         </div>
-        <div>
-          <button class="btn btn-default" id="filter-by-genre">Filter Songs By Selected Genre</button>
-          <form>
-            <fieldset>
-              <p>
+
+        <div id="filter-songs">
+          <div>
+            <h4>Enter Filter Fields</h4>
+            <form>
+              <fieldset>
+                <label>Enter Year</label>
+                <input id="year" placeholder="yyyy">
+              </fieldset>
+              <fieldset>
+                <label>Enter Month</label>
+                <input id="month" placeholder="mm">
+              </fieldset>
+              <fieldset>
+                <label>Enter Day</label>
+                <input id="day" placeholder="dd">
+              </fieldset>
+
+              <fieldset>
+                <label>Enter Number of Artists On Track</label>
+                <input id="NumOfArtists" placeholder="#">
+              </fieldset>
+
+              <fieldset>
                 <label>Select Genre</label>
                 <select id="genre-list">
                   <option value="1">Select One...</option>
                 </select>
-              </p>
-            </fieldset>
-          </form>
+              </fieldset>
+
+              <fieldset>
+                <label>Enter Genre Search Word</label>
+                <input id="genre-keyword" placeholder="Search Genre">
+              </fieldset>
+            </form>
+          </div>
+          <button class="btn btn-default search-btn" id="filter-by-all">Filter Songs</button>
+          <div id="filter-song-count"></div>
         </div>
-        <div id="resulting-tracks"></div>
-        <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
+
+        <div id="select-songs">
+          <div id="resulting-tracks"></div>
+          <input id="playlist-name" placeholder="Enter Playlist Name">
+          <button class="btn btn-default search-btn" id="save-songs-to-playlist">Save as Playlist</button>
+          <div id="saved-message">Successfully Saved Playlist to Your Account!</div>
+        </div>
+
+        <!-- <button class="btn btn-default search-btn" id="obtain-new-token">Obtain new token using the refresh token</button> -->
       </div>
-    </div>
+
+      <footer>
+        Enjoy!
+      </footer>
+    </article>
 
     <script id="user-profile-template" type="text/x-handlebars-template">
-      <h1>Logged in as {{display_name}}</h1>
       <div class="media">
         <div class="pull-left">
-          <img class="media-object" width="150" src="{{images.0.url}}" />
+          <img id="profile-image" src="{{images.0.url}}" />
         </div>
-        <div class="media-body">
-          <dl class="dl-horizontal">
-            <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
-            <dt>Id</dt><dd>{{id}}</dd>
-            <dt>Email</dt><dd>{{email}}</dd>
-            <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
-            <dt>Link</dt><dd><a href="{{href}}">{{href}}</a></dd>
-            <dt>Profile Image</dt><dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
-            <dt>Country</dt><dd>{{country}}</dd>
-          </dl>
-        </div>
+        <p>Hello,</p>
+        <p id="user-id">{{id}}</p>
       </div>
-    </script>
-
-    <script id="song-count-template" type="text/x-handlebars-template">
-      <h3>Number of Songs Found: {{count}}</h3>
+    </div>
+    <!-- <div class="media-body">
+      <dl class="dl-horizontal">
+        <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
+        <dt>Email</dt><dd>{{email}}</dd>
+        <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
+        <dt>Link</dt><dd><a href="{{href}}">{{href}}</a></dd>
+        <dt>Profile Image</dt><dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
+        <dt>Country</dt><dd>{{country}}</dd>
+      </dl> -->
     </script>
 
     <script id="resulting-tracks-template" type="text/x-handlebars-template">
-      <div class='track'>
+      <div id="{{id}}" class='sb-track' onclick='removeSong(this)'>
         <p>{{name}}</p>
-        <img width="100" src="{{album.images.0.url}}" title="{{name}}" />
+        <img width="50" src="{{album.images.0.url}}" title="{{name}}" />
       </div>
     </script>
 
     <script id="resulting-playlists-template" type="text/x-handlebars-template">
-      <div id="{{id}}" class='playlist' onclick='removePlaylist(this)'> 
+      <div id="{{id}}" class='sb-playlist' onclick='removePlaylist(this)'> 
         <p>{{name}}</p>
         <img width="50" src="{{images.0.url}}" title="{{name}}" />
       </div>
@@ -89,8 +123,8 @@
     <script id="oauth-template" type="text/x-handlebars-template">
       <h2>oAuth info</h2>
       <dl class="dl-horizontal">
-        <dt>Access token</dt><dd id="access_token" class="text-overflow">{{access_token}}</dd>
-        <dt>Refresh token</dt><dd class="text-overflow">{{refresh_token}}</dd>
+        <dt>Access token</dt><dd id="access_token" class="sb-text-overflow">{{access_token}}</dd>
+        <dt>Refresh token</dt><dd class="sb-text-overflow">{{refresh_token}}</dd>
       </dl>
     </script>
 

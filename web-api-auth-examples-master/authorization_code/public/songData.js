@@ -1,56 +1,45 @@
-function property(key){
-    return function(x){
-        return x != null ? x[key] : null;
-    }
-}
-
-function flatten(a,b){
-    return a.concat(b);
-}
-
 var playlists = [];         // Array of users playlists
 var playlistTrackLinks = [];// Array of playlist track hrefs and totals
 var playlistTracks = [];    // Array of playlist tracks (.track to get the full track)
 var tracks = [];            // Array of all user tracks
 var albums = [];            // Array of all users albums (used for dates)
-var artistsFull = [];            // Array of all users albums (used for dates)
+var artistsFull = [];       // Array of all users albums (used for dates)
 var artists = [];           // Array of all users artists (used for genres)
 var genres = [];            // Array of genres
+var filteredSongs = [];     // Filtered Songs
 
 var resultingTracksSource = document.getElementById('resulting-tracks-template').innerHTML,
     resultingTracksTemplate = Handlebars.compile(resultingTracksSource),
     resultingTracksPlaceholder = document.getElementById('resulting-tracks');
 
-var songCountSource = document.getElementById('song-count-template').innerHTML,
-    songCountTemplate = Handlebars.compile(songCountSource),
-    songCountPlaceholder = document.getElementById('song-count');
-
 var playlistsSource = document.getElementById('resulting-playlists-template').innerHTML,
     playlistsTemplate = Handlebars.compile(playlistsSource),
     playlistsPlaceholder = document.getElementById('resulting-playlists');
 
-//This needs to be called in the index file with access token
-//actually or can i get element and use that? or find a different way to share it tbh, all options sound messy
 document.getElementById('get_user_playlists').addEventListener('click', function() {
+    playlists = [];
     getPlaylistsForCurrentUser(0);
 }, false);
 
 document.getElementById('get_user_songs').addEventListener('click', function() {
-    //should disable until playlists are in
+    playlistTrackLinks = [];
+    playlistTracks = [];
+    tracks = [];
+    albums = [];
+    artistsFull = [];
+    genres = [];
     playlistTrackLinks = playlists.map(property("tracks"));
-    // playlistTrackLinks = playlistTrackLinks.reduce(flatten,[]);
     addPlaylistsTracksToList(0);
 }, false);
 
-document.getElementById('filter-by-date').addEventListener('click', function() {
+function FilterSongsByDate() {
     var year = document.getElementById("year").value;
     var month = document.getElementById("month").value;
     var day = document.getElementById("day").value;
 
-    var tracksFromDate = tracks;
     if(year != "")
     {
-        tracksFromDate = tracksFromDate.filter((t) => 
+        filteredSongs = filteredSongs.filter((t) => 
         {
             var releaseDate = t.album.release_date;
             return releaseDate != null ? releaseDate.substring(0, year.length) == year : false;
@@ -58,7 +47,7 @@ document.getElementById('filter-by-date').addEventListener('click', function() {
     }
     if(month != "" && month.length == 2)
     {
-        tracksFromDate = tracksFromDate.filter((t) => 
+        filteredSongs = filteredSongs.filter((t) => 
         {
             var releaseDate = t.album.release_date; 1995-01-01
             return releaseDate != null ? releaseDate.substring(5, 7) == month : false;
@@ -66,61 +55,139 @@ document.getElementById('filter-by-date').addEventListener('click', function() {
     }
     if(day != "" && day.length == 2)
     {
-        tracksFromDate = tracksFromDate.filter((t) => 
+        filteredSongs = filteredSongs.filter((t) => 
         {
             var releaseDate = t.album.release_date;
             return releaseDate != null ? releaseDate.substring(8, 10) == day : false;
         });
     }
+};
 
-    var tracksHtml = tracksFromDate.map(function (track) {
-        return resultingTracksTemplate(track);
-    }).join('');
-    setSongCount(tracksFromDate.length);
-    resultingTracksPlaceholder.innerHTML = tracksHtml;
-}, false);
-
-document.getElementById('filter-by-num-of-artists').addEventListener('click', function() {
+function FilterSongsByArtists() {
     var NumOfArtists = parseInt(document.getElementById("NumOfArtists").value);
 
-    if(NumOfArtists != undefined)
+    if(!isNaN(NumOfArtists))
     {
-        var tracksWithGivenNumOfArtists = tracks.filter((t) => 
+        filteredSongs = filteredSongs.filter((t) => 
         {
             var trackArtists = t.artists;
             return trackArtists != null ? trackArtists.length == NumOfArtists : false;
         });
 
-        setSongCount(tracksWithGivenNumOfArtists.length);
-        var tracksHtml = tracksWithGivenNumOfArtists.map(function (track) {
-            return resultingTracksTemplate(track);
-        }).join('');
-        resultingTracksPlaceholder.innerHTML = tracksHtml;
+        DisplayFilteredSongs();
     }
-}, false);
+};
 
-document.getElementById('filter-by-genre').addEventListener('click', function() {
+function FilterSongsByGenre() {
     //Need to be able to select Multiple genres?? ugh
     var genreList = document.getElementById("genre-list");
-    var selectedGenre = genreList.options[genreList.selectedIndex];
+    var selectedGenre = genreList.options[genreList.selectedIndex].value;
+
+    var artistIdsWithGenre = artistsFull.filter(a => {
+        return a.genres.includes(selectedGenre);
+    }).map(property("id"));
 
     if(selectedGenre != "1")
     {
-        var tracksWithGivenGenre = tracks.filter((t) => 
+        filteredSongs = filteredSongs.filter((t) => 
         {
-            //TODO: How do I best actaully filter these songs...
-            //Do I keep track and set the genre beforehand?
-            //Do I call the api again? 
-            //Check the playlist create api... I probably only need the id, so no need to keep the return form?!
-            var trackGenres = [selectedGenre];
-            return trackGenres != null ? trackGenres.includes(selectedGenre) : false;
+            var match = false;
+            t.artists.forEach(a => {
+                if(artistIdsWithGenre.includes(a.id))
+                    match = true;
+            });
+            return match;
         });
 
-        setSongCount(tracksWithGivenGenre.length);
-        var tracksHtml = tracksWithGivenGenre.map(function (track) {
-            return resultingTracksTemplate(track);
-        }).join('');
-        resultingTracksPlaceholder.innerHTML = tracksHtml;
+        DisplayFilteredSongs();
+    }
+};
+
+function FilterSongsByGenreKeyWord() {
+    var genreSearch = document.getElementById("genre-keyword").value;
+
+    var artistIdsWithGenre = artistsFull.filter(a => {
+        var match = false;
+        a.genres.forEach(g => {
+            if(g.includes(genreSearch))
+                match = true;
+        });
+        return match;
+    }).map(property("id"));
+
+    if(genreSearch != "")
+    {
+        filteredSongs = filteredSongs.filter((t) => 
+        {
+            var match = false;
+            t.artists.forEach(a => {
+                if(artistIdsWithGenre.includes(a.id))
+                    match = true;
+            });
+            return match;
+        });
+
+        DisplayFilteredSongs();
+    }
+};
+
+document.getElementById('filter-by-all').addEventListener('click', function() {
+    filteredSongs = tracks;
+
+    FilterSongsByDate();
+    FilterSongsByArtists();
+    FilterSongsByGenre();
+    FilterSongsByGenreKeyWord();
+
+    DisplayFilteredSongs();
+    $('#select-songs').show();
+}, false);
+
+function DisplayFilteredSongs(){
+    setFilterSongCount(filteredSongs.length);
+    var tracksHtml = filteredSongs.map(function (track) {
+        return resultingTracksTemplate(track);
+    }).join('');
+    resultingTracksPlaceholder.innerHTML = tracksHtml;
+}
+
+document.getElementById('save-songs-to-playlist').addEventListener('click', function() {
+    var playlistName = document.getElementById("playlist-name").value;
+    var access_token = document.getElementById("access_token").innerText;
+    var userId = document.getElementById("user-id").innerText;
+    var dataPackage = JSON.stringify({"name":playlistName, "description":"Created By Me"});
+
+    if(playlistName != "")
+    {
+        $.ajax({
+            type: "POST",
+            url: "https://api.spotify.com/v1/users/" + userId + "/playlists",
+            contentType: 'application/json',
+            headers: {
+                'Authorization': 'Bearer ' + access_token
+            },
+            dataType: 'json',
+            data: dataPackage,
+            success: function(response) {
+                var playlistId = response.id;
+                var songsToAddUris = filteredSongs.map(property("uri")).slice(0, 20);
+
+                var songsToAddBody = {"uris": songsToAddUris};
+
+                $.ajax({
+                    type: 'POST',
+                    url: "https://api.spotify.com/v1/users/" + userId + "/playlists/" + playlistId + "/tracks",
+                    contentType: 'application/json',
+                    headers: {
+                        'Authorization': 'Bearer ' + access_token
+                    },
+                    data: JSON.stringify(songsToAddBody),
+                    success: function(response) {
+                        $('#saved-message').show();
+                    }
+                });
+            }
+        });
     }
 }, false);
 
@@ -183,13 +250,13 @@ function processTrackData(){
             return tracks.find(t => t.id === id)
         });
 
-    albums = tracks.map(property("album")).reduce(flatten,[]);
-    albums = Array.from(new Set(albums.map(a => a.id)))
-        .map(id => {
-            return albums.find(a => a.id === id)
-        });
+    // albums = tracks.map(property("album")).reduce(flatten,[]);
+    // albums = Array.from(new Set(albums.map(a => a.id)))
+    //     .map(id => {
+    //         return albums.find(a => a.id === id)
+    //     });
 
-    artists = albums.map(property("artists")).reduce(flatten,[]);
+    artists = tracks.map(property("artists")).reduce(flatten,[]).filter((el) => { return el != null });
     artists = Array.from(new Set(artists.map(a => a.id)))
     .map(id => {
         return artists.find(a => a.id === id)
@@ -198,6 +265,7 @@ function processTrackData(){
     getGenresFromArtists(0);
     
     setSongCount(tracks.length);
+    $('#filter-songs').show();
 }
 
 function getGenresFromArtists(artistIdx)
@@ -227,6 +295,7 @@ function getGenresFromArtists(artistIdx)
                 getGenresFromArtists(i);
             }
             else {
+                artistsFull = artistsFull.filter((el) => { return el != null });
                 genres = artistsFull.map(property("genres")).reduce(flatten,[]);
                 genres = Array.from(new Set(genres.map(g => g)))
                     .map(gg => {
@@ -245,10 +314,12 @@ function getGenresFromArtists(artistIdx)
     });
 }
 
-function setSongCount(trackCcount){
-    songCountPlaceholder.innerHTML = songCountTemplate({
-        count: trackCcount
-    });
+function setSongCount(trackCount){
+    document.getElementById("song-count").innerText = "Number of Songs Found: " +  trackCount;
+}
+
+function setFilterSongCount(trackCount){
+    document.getElementById("song-count").innerText = "Number of Songs Found: " +  trackCount;
 }
 
 function displayPlaylistData(){
@@ -257,7 +328,7 @@ function displayPlaylistData(){
         return playlistsTemplate(playlist);
     }).join('');
     playlistsPlaceholder.innerHTML = playlistsHtml;
-
+    $('#get-songs').show();
 }
 
 function removePlaylist(element)
@@ -265,4 +336,21 @@ function removePlaylist(element)
     playlists = playlists.filter(function(value, index, arr){ return value.id != element.id;});
     document.getElementById("playlist-count").innerText = "Number of Playlists Found: " +  playlists.length;
     element.remove();
+}
+
+function removeSong(element)
+{
+    filteredSongs = filteredSongs.filter(function(value, index, arr){ return value.id != element.id;});
+    setFilterSongCount(filteredSongs.length);
+    element.remove();
+}
+
+function property(key){
+    return function(x){
+        return x != null ? x[key] : null;
+    }
+}
+
+function flatten(a,b){
+    return a.concat(b);
 }

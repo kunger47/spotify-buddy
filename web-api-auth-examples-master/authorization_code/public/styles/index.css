@@ -1,26 +1,106 @@
+/* overrides */
+p {
+  margin: 10px;
+}
+
+input, select {
+  border-radius: 50px;
+  padding-left: 5px;
+}
+
+h4 {
+  font-size: 2em;
+  font-weight: bold;
+  color: darkgreen;
+}
+
+/* Layout */
+body {
+  background-color: lightgreen;
+}
+
+article {
+  position: relative;
+  min-height: 100vh;
+}
+
+header {
+  background-color: darkgreen;
+  font-size: 3em;
+  padding: 1%;
+  text-align: center;
+  color: lightgreen;
+  font-weight: bold;
+}
+
+footer {
+  background-color: darkgreen;
+  font-size: 1em;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 4rem;  
+  padding: .75em;
+  text-align: center;
+  font-weight: bold;
+  color: lightgreen;
+}
+
 #login, #loggedin {
     display: none;
+    padding-bottom: 4rem;    /* Footer height */
   }
-  
-.text-overflow {
+
+#login {
+  margin: 22%;
+  text-align: center;
+}
+
+#oauth {
+  display: none;
+}
+
+#get-songs, #filter-songs, #select-songs {
+  display: none;
+}
+
+#get-playlists, #get-songs, #filter-songs, #select-songs {
+  text-align: center;
+}
+
+#login-btn {
+  height: 10%;
+}
+
+.search-btn {
+  background-color: darkgreen;
+  border-color: white;
+  border-radius: 50px;
+  color: #fff;
+  margin: 20px;
+}
+
+#user-profile {
+  box-shadow: 0px 10px 60px 30px darkgreen;
+  font-size: 3em;
+  font-weight: bold;
+  color: darkgreen;
+}
+
+#profile-image {
+  width: 150px;
+  display: block;
+  padding: 10%;
+}
+
+.sb-text-overflow {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 500px;
   }
 
-.track {
-  text-align: center;
-  height: 170px;
-  display: inline-grid;
-  width: 150px;
-  outline: solid;
-  justify-items: center;
-  margin: 5px;
-  background: linear-gradient(45deg, black, transparent);
-}
-
-.playlist {
+.sb-track {
   text-align: center;
   height: 120px;
   display: inline-grid;
@@ -28,10 +108,22 @@
   outline: solid;
   justify-items: center;
   margin: 5px;
-  background: linear-gradient(0deg, black, transparent);
+  color: lightgreen;
+  background: linear-gradient(0deg, black, darkgreen);
 }
 
-input, button {
-  margin: 8px;
-  margin-bottom: 8px !important;
+.sb-playlist {
+  text-align: center;
+  height: 120px;
+  display: inline-grid;
+  width: 100px;
+  outline: solid;
+  justify-items: center;
+  margin: 5px;
+  color: lightgreen;
+  background: linear-gradient(0deg, black, darkgreen);
+}
+
+#saved-message {
+  display: none;
 }
