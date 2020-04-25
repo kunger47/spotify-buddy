@@ -179,7 +179,7 @@ document.getElementById('save-songs-to-playlist').addEventListener('click', func
 function AddSongsToPlaylist(playlistId, offset){
     var access_token = document.getElementById("access_token").innerText;
     var userId = document.getElementById("user-id").innerText;
-    
+
     var limit = offset + 100 > filteredSongs.length ? filteredSongs.length - offset : 100; 
     var songsToAddUris = filteredSongs.map(property("uri")).slice(offset, offset + limit);
     var songsToAddBody = {"uris": songsToAddUris};
@@ -327,7 +327,7 @@ function setSongCount(trackCount){
 }
 
 function setFilterSongCount(trackCount){
-    document.getElementById("song-count").innerText = "Number of Songs Found: " +  trackCount;
+    document.getElementById("filter-song-count").innerText = "Number of Songs Found: " +  trackCount;
 }
 
 function displayPlaylistData(){

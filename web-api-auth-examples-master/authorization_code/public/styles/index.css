@@ -1,3 +1,13 @@
+:root {
+  --primary-color: mediumseagreen;
+  --secondary-color: black;
+}
+
+#div1 {
+  background-color: var(--primary-color);
+  padding: 5px;  
+}
+
 /* overrides */
 p {
   margin: 10px;
@@ -11,12 +21,12 @@ input, select {
 h4 {
   font-size: 2em;
   font-weight: bold;
-  color: darkgreen;
+  color: var(--secondary-color);
 }
 
 /* Layout */
 body {
-  background-color: lightgreen;
+  background-color: var(--primary-color);
 }
 
 article {
@@ -25,16 +35,16 @@ article {
 }
 
 header {
-  background-color: darkgreen;
+  background-color: var(--secondary-color);
   font-size: 3em;
   padding: 1%;
   text-align: center;
-  color: lightgreen;
+  color: var(--primary-color);
   font-weight: bold;
 }
 
 footer {
-  background-color: darkgreen;
+  background-color: var(--secondary-color);
   font-size: 1em;
   position: absolute;
   bottom: 0;
@@ -43,7 +53,7 @@ footer {
   padding: .75em;
   text-align: center;
   font-weight: bold;
-  color: lightgreen;
+  color: var(--primary-color);
 }
 
 #login, #loggedin {
@@ -73,7 +83,7 @@ footer {
 }
 
 .search-btn {
-  background-color: darkgreen;
+  background-color: var(--secondary-color);
   border-color: white;
   border-radius: 50px;
   color: #fff;
@@ -81,16 +91,24 @@ footer {
 }
 
 #user-profile {
-  box-shadow: 0px 10px 60px 30px darkgreen;
+  box-shadow: 0px 10px 60px 50px var(--secondary-color);
   font-size: 3em;
   font-weight: bold;
-  color: darkgreen;
+  color: var(--secondary-color);
 }
 
 #profile-image {
   width: 150px;
   display: block;
   padding: 10%;
+}
+
+#filter-form {
+  margin: 0px 50px;
+  padding: 5px 0px 20px 0px;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  border-radius: 50px;
 }
 
 .sb-text-overflow {
@@ -105,11 +123,19 @@ footer {
   height: 120px;
   display: inline-grid;
   width: 100px;
-  outline: solid;
   justify-items: center;
   margin: 5px;
-  color: lightgreen;
-  background: linear-gradient(0deg, black, darkgreen);
+  color: var(--primary-color);
+  background: linear-gradient(0deg, var(--primary-color), var(--secondary-color));
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-thumbnail {
+  width:50px;
+  height: 50px;
+  object-fit: cover;
 }
 
 .sb-playlist {
@@ -117,11 +143,27 @@ footer {
   height: 120px;
   display: inline-grid;
   width: 100px;
-  outline: solid;
   justify-items: center;
   margin: 5px;
-  color: lightgreen;
-  background: linear-gradient(0deg, black, darkgreen);
+  color: var(--primary-color);
+  background: linear-gradient(0deg, var(--primary-color), var(--secondary-color));
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-thumbnail-header {
+  overflow: overlay;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.sb-thumbnail-header::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE and Edge */
+.sb-thumbnail-header {
+  -ms-overflow-style: none;
 }
 
 #saved-message {

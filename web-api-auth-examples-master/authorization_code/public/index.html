@@ -33,8 +33,8 @@
         </div>
 
         <div id="filter-songs">
-          <div>
-            <h4>Enter Filter Fields</h4>
+          <div id="filter-form">
+            <h3>Enter Filter Fields</h4>
             <form>
               <fieldset>
                 <label>Enter Year</label>
@@ -108,15 +108,15 @@
 
     <script id="resulting-tracks-template" type="text/x-handlebars-template">
       <div id="{{id}}" class='sb-track' onclick='removeSong(this)'>
-        <p>{{name}}</p>
-        <img width="50" src="{{album.images.0.url}}" title="{{name}}" />
+        <p class="sb-thumbnail-header">{{name}}</p>
+        <img class="sb-thumbnail" width="50" src="{{album.images.0.url}}" title="{{name}}" />
       </div>
     </script>
 
     <script id="resulting-playlists-template" type="text/x-handlebars-template">
       <div id="{{id}}" class='sb-playlist' onclick='removePlaylist(this)'> 
-        <p>{{name}}</p>
-        <img width="50" src="{{images.0.url}}" title="{{name}}" />
+        <p class="sb-thumbnail-header">{{name}}</p>
+        <img class="sb-thumbnail" src="{{images.0.url}}" title="{{name}}" />
       </div>
     </script>
 
