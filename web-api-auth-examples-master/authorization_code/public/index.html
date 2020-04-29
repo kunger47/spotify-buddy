@@ -62,8 +62,28 @@
               </fieldset>
 
               <fieldset>
-                <label>Enter Genre Search Word</label>
+                <label>Enter Genre Keyword</label>
                 <input id="genre-keyword" placeholder="Search Genre">
+              </fieldset>
+
+              <fieldset>
+                <label>Search Song Titles</label>
+                <input id="title-keyword" placeholder="Search Titles">
+              </fieldset>
+
+              <fieldset>
+                <label>Search Album Titles</label>
+                <input id="album-keyword" placeholder="Search Albums">
+              </fieldset>
+
+              <fieldset>
+                <label>Search Artists Titles</label>
+                <input id="artist-keyword" placeholder="Search Artists">
+              </fieldset>
+
+              <fieldset class="slidecontainer">
+                <input type="range" min="0" max="100" value="0" class="slider" id="popularity-filter">
+                <p>Popularity: <input type="button" id="popularity-compare" value=">="></input> <span id="popularity-value"></span></p>
               </fieldset>
             </form>
           </div>
@@ -86,6 +106,27 @@
       </footer>
     </article>
 
+    <script>
+      var slider = document.getElementById("popularity-filter");
+      var output = document.getElementById("popularity-value");
+      var comparator = document.getElementById("popularity-compare");
+      output.innerHTML = slider.value;
+      comparator.innerHTML = comparator.value;
+      
+      slider.oninput = function() {
+        output.innerHTML = this.value;
+      }
+
+      comparator.addEventListener('click', function() {
+        if(this.value == "=")
+          this.value = '>=';
+        else if(this.value == ">=")
+          this.value = '<=';
+        else 
+          this.value = '=';
+      }, false);
+    </script>
+
     <script id="user-profile-template" type="text/x-handlebars-template">
       <div class="media">
         <div class="pull-left">
@@ -107,10 +148,13 @@
     </script>
 
     <script id="resulting-tracks-template" type="text/x-handlebars-template">
-      <div id="{{id}}" class='sb-track' onclick='removeSong(this)'>
-        <p class="sb-thumbnail-header">{{name}}</p>
-        <img class="sb-thumbnail" width="50" src="{{album.images.0.url}}" title="{{name}}" />
-      </div>
+      <audio id="audio-{{id}}" class="audio">
+        <source src="{{preview_url}}" />
+      </audio>
+        <div id="{{id}}" class='sb-track' onclick='removeSong(this)' onmouseover='PlaySample(this)' onmouseleave="StopSample(this)">
+          <p class="sb-thumbnail-header">{{name}}</p>
+          <img class="sb-thumbnail" width="50" src="{{album.images.0.url}}" title="Track: {{name}}&#10;Album: {{album.name}}&#10;Artist: {{artists.0.name}}" />
+        </div>
     </script>
 
     <script id="resulting-playlists-template" type="text/x-handlebars-template">
