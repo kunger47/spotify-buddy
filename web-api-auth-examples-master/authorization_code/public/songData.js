@@ -2,10 +2,16 @@ var playlists = [];         // Array of users playlists
 var playlistTrackLinks = [];// Array of playlist track hrefs and totals
 var playlistTracks = [];    // Array of playlist tracks (.track to get the full track)
 var tracks = [];            // Array of all user tracks
-// var albums = [];            // Array of all users albums (used for dates)
+// var albums = [];         // Array of all users albums (used for dates)
 var artistsFull = [];       // Array of all users artistsFull (used for dates)
 var genres = [];            // Array of genres
 var filteredSongs = [];     // Filtered Songs
+var allUsersSongs = [];     // Array of Arrays to be stored in local storage
+var matchingSongs = [];
+
+var matchingTracksSource = document.getElementById('resulting-tracks-template').innerHTML,
+    matchingTracksTemplate = Handlebars.compile(matchingTracksSource),
+    matchingTracksPlaceholder = document.getElementById('matching-tracks');
 
 var resultingTracksSource = document.getElementById('resulting-tracks-template').innerHTML,
     resultingTracksTemplate = Handlebars.compile(resultingTracksSource),
@@ -14,6 +20,10 @@ var resultingTracksSource = document.getElementById('resulting-tracks-template')
 var playlistsSource = document.getElementById('resulting-playlists-template').innerHTML,
     playlistsTemplate = Handlebars.compile(playlistsSource),
     playlistsPlaceholder = document.getElementById('resulting-playlists');
+
+var filteredSongsLocalStorage = "filtered-songs";
+allUsersSongs = JSON.parse(sessionStorage.getItem(filteredSongsLocalStorage) || "[]");
+var userCount = allUsersSongs.length;
 
 //Getting Playlists
 document.getElementById('get_user_playlists').addEventListener('click', function() {
@@ -99,6 +109,9 @@ function processTrackData(playlistTracks){
         .map(id => {
             return tracks.find(t => t.id === id)
         });
+    tracks = tracks.filter(t => {
+        return t.is_local == false;
+    });
 
     // albums = tracks.map(property("album")).reduce(flatten,[]);
     // albums = Array.from(new Set(albums.map(a => a.id)))
@@ -180,6 +193,8 @@ document.getElementById('filter-by-all').addEventListener('click', function() {
     FilterSongsByPopularity();
 
     DisplayFilteredSongs();
+    allUsersSongs[userCount] = filteredSongs.map(twoProperty("id", "uri"));
+    sessionStorage.setItem(filteredSongsLocalStorage, JSON.stringify(allUsersSongs));
     $('#select-songs').show();
 }, false);
 
@@ -364,10 +379,10 @@ function FilterSongsByPopularity() {
 
 function DisplayFilteredSongs(){
     setFilterSongCount(filteredSongs.length);
-    var tracksHtml = filteredSongs.map(function (track) {
-        return resultingTracksTemplate(track);
-    }).join('');
-    resultingTracksPlaceholder.innerHTML = tracksHtml;
+    // var tracksHtml = filteredSongs.map(function (track) {
+    //     return resultingTracksTemplate(track);
+    // }).join('');
+    // resultingTracksPlaceholder.innerHTML = tracksHtml;
 }
 
 function setFilterSongCount(trackCount){
@@ -425,6 +440,88 @@ function AddSongsToPlaylist(playlistId, offset){
     });
 }
 
+//Get Matching songs
+document.getElementById('compare-user-data').addEventListener('click', function() {
+    matchingSongs = allUsersSongs[0].filter(function (track) {
+        var match = false;
+        allUsersSongs[1].forEach(t => {
+            if(t.id == track.id)
+            {
+                match = true;
+            }
+        });
+        return match;
+    });
+
+    DisplayMatchingSongs();
+
+    $('#select-matching-songs').show();
+
+}, false);
+
+function DisplayMatchingSongs(){
+    setMatchingSongCount(matchingSongs.length);
+    var tracksHtml = matchingSongs.map(function (track) {
+        return matchingTracksTemplate(track);
+    }).join('');
+    matchingTracksPlaceholder.innerHTML = tracksHtml;
+}
+
+function setMatchingSongCount(trackCount){
+    document.getElementById("matching-song-count").innerText = "Number of Matching Songs: " +  trackCount;
+}
+
+//Save matching songs to playlist
+document.getElementById('save-matching-songs-to-playlist').addEventListener('click', function() {
+    var playlistName = document.getElementById("matching-playlist-name").value;
+    var access_token = document.getElementById("access_token").innerText;
+    var userId = document.getElementById("user-id").innerText;
+    var dataPackage = JSON.stringify({"name":playlistName, "description":"Created By Me"});
+
+    if(playlistName != "")
+    {
+        $.ajax({
+            type: "POST",
+            url: "https://api.spotify.com/v1/users/" + userId + "/playlists",
+            contentType: 'application/json',
+            headers: {
+                'Authorization': 'Bearer ' + access_token
+            },
+            dataType: 'json',
+            data: dataPackage,
+            success: function(response) {
+                var playlistId = response.id;
+                AddSongsToMatchingPlaylist(playlistId, 0);
+            }
+        });
+    }
+}, false);
+
+function AddSongsToMatchingPlaylist(playlistId, offset){
+    var access_token = document.getElementById("access_token").innerText;
+    var userId = document.getElementById("user-id").innerText;
+
+    var limit = offset + 100 > matchingSongs.length ? matchingSongs.length - offset : 100; 
+    var songsToAddUris = matchingSongs.map(property("uri")).slice(offset, offset + limit);
+    var songsToAddBody = {"uris": songsToAddUris};
+
+    $.ajax({
+        type: 'POST',
+        url: "https://api.spotify.com/v1/users/" + userId + "/playlists/" + playlistId + "/tracks",
+        contentType: 'application/json',
+        headers: {
+            'Authorization': 'Bearer ' + access_token
+        },
+        data: JSON.stringify(songsToAddBody),
+        success: function(response) {
+            if(limit == 100)
+                AddSongsToMatchingPlaylist(playlistId, offset + 100);
+            else
+                $('#saved-message').show();
+        }
+    });
+}
+
 //Removal Functions
 function removePlaylist(element)
 {
@@ -456,6 +553,13 @@ function StopSample(element) {
 function property(key){
     return function(x){
         return x != null ? x[key] : null;
+    }
+}
+
+//Helpers
+function twoProperty(key1, key2){
+    return function(x){
+        return x != null ? {[key1]: x[key1], [key2]: x[key2]} : null;
     }
 }
 

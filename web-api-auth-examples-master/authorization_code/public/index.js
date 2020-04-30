@@ -52,6 +52,14 @@ if (error) {
         $('#loggedin').hide();
     }
 
+    document.getElementById('log-out').addEventListener('click', function() {
+        oauthPlaceholder.innerHTML = oauthTemplate({
+            access_token: "",
+            refresh_token: ""
+        });
+        $('#login').show();
+        $('#loggedin').hide();
+    }, false);
     // document.getElementById('obtain-new-token').addEventListener('click', function() {
     //     $.ajax({
     //         url: '/refresh_token',

@@ -22,7 +22,7 @@
         <div id="oauth"></div>
 
         <div id="get-playlists">
-          <button class="btn btn-default search-btn" id="get_user_playlists">Get Playlists</button>
+          <button class="btn btn-default search-btn" id="get_user_playlists">Get My Playlists</button>
           <p id="playlist-count"></p>
           <div id="resulting-playlists"></div>
         </div>
@@ -95,7 +95,20 @@
           <div id="resulting-tracks"></div>
           <input id="playlist-name" placeholder="Enter Playlist Name">
           <button class="btn btn-default search-btn" id="save-songs-to-playlist">Save as Playlist</button>
+          <button class="btn btn-default search-btn" id="compare-user-data">Compare All Users Filtered Songs</button>
           <div id="saved-message">Successfully Saved Playlist to Your Account!</div>
+        </div>
+
+        <div id="select-matching-songs">
+          <div id="matching-song-count"></div>
+          <div id="matching-tracks"></div>
+          <input id="matching-playlist-name" placeholder="Enter Playlist Name">
+          <button class="btn btn-default search-btn" id="save-matching-songs-to-playlist">Save as Playlist</button>
+        </div>
+
+        <div id="switch-accounts" >
+          <button class="btn btn-default search-btn" id="log-out">Log Another User In</button>
+          <div>This will log you out and will no longer be able to filter your data!</div>
         </div>
 
         <!-- <button class="btn btn-default search-btn" id="obtain-new-token">Obtain new token using the refresh token</button> -->
@@ -106,27 +119,6 @@
       </footer>
     </article>
 
-    <script>
-      var slider = document.getElementById("popularity-filter");
-      var output = document.getElementById("popularity-value");
-      var comparator = document.getElementById("popularity-compare");
-      output.innerHTML = slider.value;
-      comparator.innerHTML = comparator.value;
-      
-      slider.oninput = function() {
-        output.innerHTML = this.value;
-      }
-
-      comparator.addEventListener('click', function() {
-        if(this.value == "=")
-          this.value = '>=';
-        else if(this.value == ">=")
-          this.value = '<=';
-        else 
-          this.value = '=';
-      }, false);
-    </script>
-
     <script id="user-profile-template" type="text/x-handlebars-template">
       <div class="media">
         <div class="pull-left">
@@ -135,16 +127,16 @@
         <p>Hello,</p>
         <p id="user-id">{{id}}</p>
       </div>
-    </div>
-    <!-- <div class="media-body">
-      <dl class="dl-horizontal">
-        <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
-        <dt>Email</dt><dd>{{email}}</dd>
-        <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
-        <dt>Link</dt><dd><a href="{{href}}">{{href}}</a></dd>
-        <dt>Profile Image</dt><dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
-        <dt>Country</dt><dd>{{country}}</dd>
-      </dl> -->
+      <!-- <div class="media-body">
+        <dl class="dl-horizontal">
+          <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
+          <dt>Email</dt><dd>{{email}}</dd>
+          <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
+          <dt>Link</dt><dd><a href="{{href}}">{{href}}</a></dd>
+          <dt>Profile Image</dt><dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
+          <dt>Country</dt><dd>{{country}}</dd>
+        </dl> 
+      </div>-->
     </script>
 
     <script id="resulting-tracks-template" type="text/x-handlebars-template">
@@ -176,5 +168,6 @@
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="index.js"></script>
     <script src="songData.js"></script>
+    <script src="popularityComparer.js"></script>
   </body>
 </html>

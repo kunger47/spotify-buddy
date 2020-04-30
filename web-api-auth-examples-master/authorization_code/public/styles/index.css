@@ -70,11 +70,11 @@ footer {
   display: none;
 }
 
-#get-songs, #filter-songs, #select-songs {
+#get-songs, #filter-songs, #select-songs, #select-matching-songs {
   display: none;
 }
 
-#get-playlists, #get-songs, #filter-songs, #select-songs {
+#get-playlists, #get-songs, #filter-songs, #select-songs, #select-matching-songs {
   text-align: center;
 }
 
@@ -150,6 +150,10 @@ footer {
   word-break: break-word;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+#switch-accounts {
+  text-align: center;
 }
 
 .audio {
