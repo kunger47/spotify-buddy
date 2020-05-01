@@ -23,6 +23,10 @@
 
         <div id="get-playlists">
           <button class="btn btn-default search-btn" id="get_user_playlists">Get My Playlists</button>
+          <div id="playlist-progress-status">
+            <label for="downloading-playlists">Gathering Playlists </label>
+            <progress id="downloading-playlists" value="0" max="100"></progress>
+          </div>
           <p id="playlist-count"></p>
           <div id="resulting-playlists"></div>
         </div>
@@ -30,6 +34,14 @@
         <div id="get-songs">
           <button class="btn btn-default search-btn" id="get_user_songs">Get Songs</button>
           <div id="song-count"></div>
+          <div id="song-progress-status">
+            <label for="downloading-songs">Gathering Saved Songs </label>
+            <progress id="downloading-songs" value="0" max="100"></progress>
+          </div>
+          <div id="playlist-song-progress-status">
+            <label for="downloading-playlist-songs">Gathering Playlist Songs </label>
+            <progress id="downloading-playlist-songs" value="0" max="100"></progress>
+          </div>
         </div>
 
         <div id="filter-songs">
@@ -81,9 +93,19 @@
                 <input id="artist-keyword" placeholder="Search Artists">
               </fieldset>
 
+              <fieldset>
+                <label>Remove Explicit Songs?</label>
+                <input type="checkbox" id="explicit-keyword">
+              </fieldset>
+
               <fieldset class="slidecontainer">
                 <input type="range" min="0" max="100" value="0" class="slider" id="popularity-filter">
-                <p>Popularity: <input type="button" id="popularity-compare" value=">="></input> <span id="popularity-value"></span></p>
+                <p>Popularity <input type="button" id="popularity-compare" value=">="></input> <span id="popularity-value"></span></p>
+              </fieldset>
+
+              <fieldset class="slidecontainer">
+                <input type="range" min="0" max="10" value="0" class="slider" id="length-filter">
+                <p>Song Length <input type="button" id="length-compare" value=">="></input> <span id="length-value"></span> min(s)</p>
               </fieldset>
             </form>
           </div>
@@ -93,9 +115,14 @@
 
         <div id="select-songs">
           <div id="resulting-tracks"></div>
+          <div>
+            <button class="btn btn-default search-btn" id="load-more-songs">Load More Songs</button>
+          </div>
           <input id="playlist-name" placeholder="Enter Playlist Name">
           <button class="btn btn-default search-btn" id="save-songs-to-playlist">Save as Playlist</button>
-          <button class="btn btn-default search-btn" id="compare-user-data">Compare All Users Filtered Songs</button>
+          <div>
+            <button class="btn btn-default search-btn" id="compare-user-data">Compare All Users Filtered Songs</button>
+          </div>
           <div id="saved-message">Successfully Saved Playlist to Your Account!</div>
         </div>
 
@@ -107,8 +134,7 @@
         </div>
 
         <div id="switch-accounts" >
-          <button class="btn btn-default search-btn" id="log-out">Log Another User In</button>
-          <div>This will log you out and will no longer be able to filter your data!</div>
+          <button class="btn btn-default search-btn" id="log-out">Log in as another User</button>
         </div>
 
         <!-- <button class="btn btn-default search-btn" id="obtain-new-token">Obtain new token using the refresh token</button> -->
@@ -143,10 +169,10 @@
       <audio id="audio-{{id}}" class="audio">
         <source src="{{preview_url}}" />
       </audio>
-        <div id="{{id}}" class='sb-track' onclick='removeSong(this)' onmouseover='PlaySample(this)' onmouseleave="StopSample(this)">
-          <p class="sb-thumbnail-header">{{name}}</p>
-          <img class="sb-thumbnail" width="50" src="{{album.images.0.url}}" title="Track: {{name}}&#10;Album: {{album.name}}&#10;Artist: {{artists.0.name}}" />
-        </div>
+      <div id="{{id}}" class='sb-track' onclick='removeSong(this)' onmouseover='PlaySample(this)' onmouseleave="StopSample(this)">
+        <p class="sb-thumbnail-header">{{name}}</p>
+        <img class="sb-thumbnail" width="50" src="{{album.images.0.url}}" title="Track: {{name}}&#10;Album: {{album.name}}&#10;Artist: {{artists.0.name}}" />
+      </div>
     </script>
 
     <script id="resulting-playlists-template" type="text/x-handlebars-template">
@@ -168,6 +194,6 @@
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="index.js"></script>
     <script src="songData.js"></script>
-    <script src="popularityComparer.js"></script>
+    <script src="comparers.js"></script>
   </body>
 </html>

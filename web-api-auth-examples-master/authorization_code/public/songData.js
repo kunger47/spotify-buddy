@@ -1,13 +1,16 @@
 var playlists = [];         // Array of users playlists
 var playlistTrackLinks = [];// Array of playlist track hrefs and totals
 var playlistTracks = [];    // Array of playlist tracks (.track to get the full track)
+var savedTracks = [];       // Array of saved tracks (.track to get the full track)
 var tracks = [];            // Array of all user tracks
 // var albums = [];         // Array of all users albums (used for dates)
 var artistsFull = [];       // Array of all users artistsFull (used for dates)
 var genres = [];            // Array of genres
 var filteredSongs = [];     // Filtered Songs
 var allUsersSongs = [];     // Array of Arrays to be stored in local storage
-var matchingSongs = [];
+var matchingSongs = [];     // Array of 2 users matching songs
+var getSavedSongs = true;
+var displayedSongs = 0;
 
 var matchingTracksSource = document.getElementById('resulting-tracks-template').innerHTML,
     matchingTracksTemplate = Handlebars.compile(matchingTracksSource),
@@ -28,11 +31,14 @@ var userCount = allUsersSongs.length;
 //Getting Playlists
 document.getElementById('get_user_playlists').addEventListener('click', function() {
     playlists = [];
+    getSavedSongs = true;
     getPlaylistsForCurrentUser(0);
 }, false);
 
 function getPlaylistsForCurrentUser(offset)
 {
+    $('#playlist-progress-status').show();
+    var progress = document.getElementById("downloading-playlists");
     var access_token = document.getElementById("access_token").innerText;
 
     $.ajax({
@@ -42,10 +48,16 @@ function getPlaylistsForCurrentUser(offset)
         },
         success: function(response) {
             playlists = playlists.concat(response.items);
-            if(offset + 50 < response.total)
-                getPlaylistsForCurrentUser(offset + 50);
+            var newOffset = offset + 50;
+            if(newOffset < response.total)
+            {
+                progress.value = newOffset;
+                progress.max = response.total;
+                getPlaylistsForCurrentUser(newOffset);
+            }
             else
             {
+                $('#playlist-progress-status').hide();
                 displayPlaylistData();
             }
         }
@@ -54,10 +66,13 @@ function getPlaylistsForCurrentUser(offset)
 
 function displayPlaylistData(){
     document.getElementById("playlist-count").innerText = "Number of Playlists Found: " +  playlists.length;
+    
+    var savedSongs = playlistsTemplate({ id: -1, name: "Saved Songs", images: [{url: ""}] });
+    playlistsPlaceholder.innerHTML = savedSongs;
     var playlistsHtml = playlists.map(function (playlist) {
         return playlistsTemplate(playlist);
     }).join('');
-    playlistsPlaceholder.innerHTML = playlistsHtml;
+    playlistsPlaceholder.innerHTML += playlistsHtml;
     $('#get-songs').show();
 }
 
@@ -65,20 +80,64 @@ function displayPlaylistData(){
 document.getElementById('get_user_songs').addEventListener('click', function() {
     playlistTrackLinks = [];
     playlistTracks = [];
+    savedTracks = [];
     tracks = [];
     // albums = [];
     artistsFull = [];
     genres = [];
     playlistTrackLinks = playlists.map(property("tracks"));
-    addPlaylistsTracksToList(0);
+    addSavedSongsToList(0);
 }, false);
 
-function addPlaylistsTracksToList(playlistIdx)
+function addSavedSongsToList(offset)
 {
-    getPlaylistTracksFromOffset(playlistIdx, playlistTrackLinks[playlistIdx], 0);
+    if(getSavedSongs)
+    {
+        $('#song-progress-status').show();
+        var progress = document.getElementById("downloading-songs");
+        var access_token = document.getElementById("access_token").innerText;
+        $.ajax({
+            url: "https://api.spotify.com/v1/me/tracks?limit=50&offset=" + offset,
+            // need to embrace async? - it is async now... but not really
+            headers: {
+                'Authorization': 'Bearer ' + access_token
+            },
+            success: function(response) {
+                savedTracks = savedTracks.concat(response.items);
+                var newOffset = offset + 50;
+                if(newOffset < response.total){
+                    progress.max = response.total;
+                    progress.value = newOffset;
+                    addSavedSongsToList(newOffset);
+                } else {
+                    if(playlistTrackLinks.length > 0)
+                    {
+                        $('#song-progress-status').hide();
+                        $('#playlist-song-progress-status').show();
+                        var playlistSongsProgress = document.getElementById("downloading-playlist-songs");
+                        playlistSongsProgress.max = playlistTrackLinks.length;
+                        addPlaylistsTracksToList(0, playlistSongsProgress);
+                    }
+                    else
+                        processTrackData();
+                }
+            }
+        });
+    } else {
+        $('#playlist-song-progress-status').show();
+        var pSProgress = document.getElementById("downloading-playlist-songs");
+        pSProgress.max = playlistTrackLinks.length;
+        addPlaylistsTracksToList(0, pSProgress);
+    }
 }
 
-function getPlaylistTracksFromOffset(playlistIdx, playlistTrackLink, offset)
+function addPlaylistsTracksToList(playlistIdx, progress)
+{
+    progress.value = playlistIdx;
+    getPlaylistTracksFromOffset(playlistIdx, playlistTrackLinks[playlistIdx], 0, progress);
+}
+
+function getPlaylistTracksFromOffset(playlistIdx, playlistTrackLink, offset, progress)
 {
     var access_token = document.getElementById("access_token").innerText;
     $.ajax({
@@ -91,20 +150,27 @@ function getPlaylistTracksFromOffset(playlistIdx, playlistTrackLink, offset)
             playlistTracks = playlistTracks.concat(response.items);
             if(offset + 100 < playlistTrackLink.total){
                 var newOffset = offset + 100;
-                getPlaylistTracksFromOffset(playlistIdx, playlistTrackLink, newOffset);
+                getPlaylistTracksFromOffset(playlistIdx, playlistTrackLink, newOffset, progress);
             }
             else {
                 if(playlistIdx < playlistTrackLinks.length - 1)
-                    addPlaylistsTracksToList(playlistIdx + 1);
+                {
+                    addPlaylistsTracksToList(playlistIdx + 1, progress);
+                }
                 else
-                    processTrackData(playlistTracks);
+                {
+                    processTrackData();
+                    $('#playlist-song-progress-status').hide();
+                }
             }
         }
     });
 }
 
-function processTrackData(playlistTracks){
-    tracks = playlistTracks.map(property("track")).reduce(flatten,[]).filter((el) => { return el != null });
+function processTrackData(){
+    tracks = savedTracks.map(property("track"));
+    tracks = tracks.concat(playlistTracks.map(property("track")));
+    tracks = tracks.reduce(flatten,[]).filter((el) => { return el != null });
     tracks = Array.from(new Set(tracks.map(t => t.id)))
         .map(id => {
             return tracks.find(t => t.id === id)
@@ -181,6 +247,8 @@ function setSongCount(trackCount){
 
 //Filter Songs
 document.getElementById('filter-by-all').addEventListener('click', function() {
+    displayedSongs = 0;
+    resultingTracksPlaceholder.innerHTML = null;
     filteredSongs = tracks;
 
     FilterSongsByDate();
@@ -191,6 +259,8 @@ document.getElementById('filter-by-all').addEventListener('click', function() {
     FilterSongsByTitleKeyWord();
     FilterSongsByAlbumKeyWord();
     FilterSongsByPopularity();
+    FilterSongsByLength();
+    RemoveExplicitSongs();
 
     DisplayFilteredSongs();
     allUsersSongs[userCount] = filteredSongs.map(twoProperty("id", "uri"));
@@ -377,17 +447,74 @@ function FilterSongsByPopularity() {
     // }
 };
 
+function FilterSongsByLength() {
+    var filter = document.getElementById("length-filter");
+    var comparator = document.getElementById("length-compare");
+    var search = parseInt(filter.value);
+
+    // TODO: add toggle for filter by pop or not
+    // if(search != "")
+    // {
+        if(comparator.value == "=")
+        {
+            filteredSongs = filteredSongs.filter((t) => 
+            {
+                return t.duration_ms == search * 60 * 1000;
+            });
+        }
+        else if(comparator.value == ">=")
+        {
+            filteredSongs = filteredSongs.filter((t) => 
+            {
+                return t.duration_ms >= search * 60 * 1000;
+            });
+        }
+        else
+        {
+            filteredSongs = filteredSongs.filter((t) => 
+            {
+                return t.duration_ms <= search * 60 * 1000;
+            });
+        }
+    // }
+};
+
+function RemoveExplicitSongs() {
+    var ignoreExplicitSongs = document.getElementById("explicit-keyword").checked;
+
+    if(ignoreExplicitSongs)
+    {
+        filteredSongs = filteredSongs.filter((t) => 
+        {
+            return !t.explicit;
+        });
+    }
+};
+
 function DisplayFilteredSongs(){
     setFilterSongCount(filteredSongs.length);
-    // var tracksHtml = filteredSongs.map(function (track) {
-    //     return resultingTracksTemplate(track);
-    // }).join('');
-    // resultingTracksPlaceholder.innerHTML = tracksHtml;
+    AddMoreFilteredSongsToDisplay();
+}
+
+function AddMoreFilteredSongsToDisplay() {
+    var tracksHtml = filteredSongs.slice(displayedSongs, displayedSongs + 100).map(function (track) {
+        return resultingTracksTemplate(track);
+    }).join('');
+    resultingTracksPlaceholder.innerHTML += tracksHtml;
+    displayedSongs += 100;
+    if(filteredSongs.length < displayedSongs)
+    {
+        $('#load-more-songs').hide();
+    }
 }
 
 function setFilterSongCount(trackCount){
     document.getElementById("filter-song-count").innerText = "Number of Songs Found: " +  trackCount;
 }
+
+document.getElementById('load-more-songs').addEventListener('click', function() {
+    AddMoreFilteredSongsToDisplay(displayedSongs);
+});
 
 //Save Playlist
 document.getElementById('save-songs-to-playlist').addEventListener('click', function() {
@@ -525,8 +652,14 @@ function AddSongsToMatchingPlaylist(playlistId, offset){
 //Removal Functions
 function removePlaylist(element)
 {
-    playlists = playlists.filter(function(value, index, arr){ return value.id != element.id;});
-    document.getElementById("playlist-count").innerText = "Number of Playlists Found: " +  playlists.length;
+    if(element.id == -1)
+    {
+        getSavedSongs = false;
+    } else { 
+        playlists = playlists.filter(function(value, index, arr){ return value.id != element.id;});
+        document.getElementById("playlist-count").innerText = "Number of Playlists Found: " +  (playlists.length + (getSavedSongs ? 1 : 0));
+    }
+
     element.remove();
 }
 
@@ -556,7 +689,6 @@ function property(key){
     }
 }
 
-//Helpers
 function twoProperty(key1, key2){
     return function(x){
         return x != null ? {[key1]: x[key1], [key2]: x[key2]} : null;

@@ -70,7 +70,7 @@ footer {
   display: none;
 }
 
-#get-songs, #filter-songs, #select-songs, #select-matching-songs {
+#get-songs, #filter-songs, #select-songs, #select-matching-songs, #playlist-progress-status, #song-progress-status, #playlist-song-progress-status {
   display: none;
 }
 
@@ -214,4 +214,25 @@ footer {
   height: 25px;
   background: var(--primary-color);
   cursor: pointer;
+}
+
+progress[value] {
+  /* Reset the default appearance */
+  -webkit-appearance: none;
+  appearance: none;
+  
+  border-radius: 30px;
+  width: 250px;
+  height: 20px;
+}
+
+progress[value]::-webkit-progress-value {
+  background-color: var(--primary-color);
+  border-radius: 30px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 1) inset;
+}
+
+progress[value]::-webkit-progress-bar {
+  background-color: black;
+  border-radius: 30px;
 }
