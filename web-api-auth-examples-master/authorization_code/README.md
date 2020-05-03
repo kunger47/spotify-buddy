@@ -34,6 +34,25 @@ Getting the Application
   - Open up your browser. Preferably Chrome.
   - Navigate to url localhost:8888
 
+  ### Take Note!
+
+- If you have Spotify set to Remember Me then when you click "Let's Do This", it will log you in immediately. If you want to log in another user. You must go to your Spotify account in your browser and log out before clicking "Lets Do This".
+- ALSO, this is annoying I know, but the matching songs across profiles functionality is very janky at the moment. If you want to use it you will have to do some work.
+  1. Before you start, when you are on the "Let's Do This" page. Press the key F12. This will open up your DevTools. 
+  2. Under the application tab click, Session Storage on the left. 
+  3. Select the "Filtered Songs" field if it is there and click "Delete Selected". 
+  4. Then log in with your user account. (Who ever you log in as the second user will get the playlist).
+  5. Pull in your playlists. Filter down which playlists you want to include in the search.
+  6. Get the songs.
+  7. Filter the gathered songs on any of the filters provided.
+  8. The resulting list of filtered songs is ultimately what will be compared later on.
+  9. Now click "Log in as another user".
+  10. In another tab, open spotify.com and log out of your account.
+  11. Now you can Click "let's do this". It should prompt you to now log in as the second user.
+  12. Filter down their songs as you did with the first user.
+  13. Click on "Compare All Users Filtered Songs".
+  14. The filtered songs cannot be seen at this time for underlying issues that need to be resolved atm. But you can click "Save as Playlist" at the bottom of the page and you can see the songs that way.
+
   ## Backlog
 
 **Getting Song Data**
