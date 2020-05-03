@@ -1,4 +1,5 @@
 var playlists = [];         // Array of users playlists
+var playlistNames = [];
 var playlistTrackLinks = [];// Array of playlist track hrefs and totals
 var playlistTracks = [];    // Array of playlist tracks (.track to get the full track)
 var savedTracks = [];       // Array of saved tracks (.track to get the full track)
@@ -58,6 +59,7 @@ function getPlaylistsForCurrentUser(offset)
             else
             {
                 $('#playlist-progress-status').hide();
+                playlistNames = playlists.map(twoProperty("id", "name"));
                 displayPlaylistData();
             }
         }
@@ -67,7 +69,7 @@ function getPlaylistsForCurrentUser(offset)
 function displayPlaylistData(){
     document.getElementById("playlist-count").innerText = "Number of Playlists Found: " +  playlists.length;
     
-    var savedSongs = playlistsTemplate({ id: -1, name: "Saved Songs", images: [{url: ""}] });
+    var savedSongs = playlistsTemplate({ id: -1, name: "Saved Songs", images: [{url: "/images/SpotifyHeartNoBackground.png"}] });
     playlistsPlaceholder.innerHTML = savedSongs;
     var playlistsHtml = playlists.map(function (playlist) {
         return playlistsTemplate(playlist);
@@ -192,13 +194,15 @@ function processTrackData(){
         });
 
     getGenresFromArtists(artists, 0);
-    
-    setSongCount(tracks.length);
-    $('#filter-songs').show();
 }
 
 function getGenresFromArtists(artists, artistIdx)
 {
+    $('#artist-progress-status').show();
+    var progress = document.getElementById("downloading-artists");
+    progress.max = artists.length;
+    progress.value = artistIdx;
+
     var access_token = document.getElementById("access_token").innerText;
     var urlFor50Artists = "https://api.spotify.com/v1/artists?ids=";
     var limit = artistIdx + 50 > artists.length ? artists.length - artistIdx : 50; 
@@ -236,6 +240,9 @@ function getGenresFromArtists(artists, artistIdx)
                     option.value = g;
                     genreList.options.add(option);
                 });
+                setSongCount(tracks.length);
+                $('#artist-progress-status').hide();
+                $('#filter-songs').show();
             }
         }
     });
@@ -505,6 +512,8 @@ function AddMoreFilteredSongsToDisplay() {
     if(filteredSongs.length < displayedSongs)
     {
         $('#load-more-songs').hide();
+    } else {
+        $('#load-more-songs').show();
     }
 }
 
@@ -513,7 +522,7 @@ function setFilterSongCount(trackCount){
 }
 
 document.getElementById('load-more-songs').addEventListener('click', function() {
-    AddMoreFilteredSongsToDisplay(displayedSongs);
+    AddMoreFilteredSongsToDisplay();
 });
 
 //Save Playlist
@@ -525,29 +534,41 @@ document.getElementById('save-songs-to-playlist').addEventListener('click', func
 
     if(playlistName != "")
     {
-        $.ajax({
-            type: "POST",
-            url: "https://api.spotify.com/v1/users/" + userId + "/playlists",
-            contentType: 'application/json',
-            headers: {
-                'Authorization': 'Bearer ' + access_token
-            },
-            dataType: 'json',
-            data: dataPackage,
-            success: function(response) {
-                var playlistId = response.id;
-                AddSongsToPlaylist(playlistId, 0);
-            }
-        });
+        var playlistToAddTo = playlistNames.find(p => p.name == playlistName);
+        if(playlistToAddTo != undefined)
+        {
+            var emptyTrackList = [];
+            AddSongsToExistingPlaylist(playlistToAddTo.id, emptyTrackList, 0);
+        } else {
+            $.ajax({
+                type: "POST",
+                url: "https://api.spotify.com/v1/users/" + userId + "/playlists",
+                contentType: 'application/json',
+                headers: {
+                    'Authorization': 'Bearer ' + access_token
+                },
+                dataType: 'json',
+                data: dataPackage,
+                success: function(response) {
+                    var playlistId = response.id;
+                    AddSongsToPlaylist(playlistId, filteredSongs, 0, false);
+                }
+            });
+        }
     }
 }, false);
 
-function AddSongsToPlaylist(playlistId, offset){
+function AddSongsToPlaylist(playlistId, songsToAdd, offset, isUpdating){
+    $('#save-progress-status').show();
+    var progress = document.getElementById("saving-playlist");
+    progress.max = songsToAdd.length;
+    progress.value = offset;
+
     var access_token = document.getElementById("access_token").innerText;
     var userId = document.getElementById("user-id").innerText;
 
-    var limit = offset + 100 > filteredSongs.length ? filteredSongs.length - offset : 100; 
-    var songsToAddUris = filteredSongs.map(property("uri")).slice(offset, offset + limit);
+    var limit = offset + 100 > songsToAdd.length ? songsToAdd.length - offset : 100; 
+    var songsToAddUris = songsToAdd.map(property("uri")).slice(offset, offset + limit);
     var songsToAddBody = {"uris": songsToAddUris};
 
     $.ajax({
@@ -560,9 +581,36 @@ function AddSongsToPlaylist(playlistId, offset){
         data: JSON.stringify(songsToAddBody),
         success: function(response) {
             if(limit == 100)
-                AddSongsToPlaylist(playlistId, offset + 100);
+                AddSongsToPlaylist(playlistId, songsToAdd, offset + 100, isUpdating);
             else
-                $('#saved-message').show();
+            {
+                isUpdating ? $('#updated-message').show() : $('#saved-message').show();
+                $('#save-progress-status').hide();
+            }
+        }
+    });
+}
+
+function AddSongsToExistingPlaylist(playlistId, tracksOfPlaylist, offset) {
+    $.ajax({
+        url: "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks?offset=" + offset,
+        async: false,
+        headers: {
+            'Authorization': 'Bearer ' + access_token
+        },
+        success: function(response) {
+            tracksOfPlaylist = tracksOfPlaylist.concat(response.items);
+            if(offset + 100 < response.total){
+                var newOffset = offset + 100;
+                return getPlaylistTracksFromOffset(playlistId, tracksOfPlaylist, newOffset);
+            } else {
+                var tracksNotInPlaylist = filteredSongs.filter(function (track) {
+                    return !tracksOfPlaylist.some(t => {
+                        return t.track.id == track.id;
+                    });
+                });
+                AddSongsToPlaylist(playlistId, tracksNotInPlaylist, 0, true);
+            }
         }
     });
 }
@@ -625,6 +673,11 @@ document.getElementById('save-matching-songs-to-playlist').addEventListener('cli
 }, false);
 
 function AddSongsToMatchingPlaylist(playlistId, offset){
+    $('#save-matching-progress-status').show();
+    var progress = document.getElementById("saving-matching-playlist");
+    progress.max = matchingSongs.length;
+    progress.value = offset;
+
     var access_token = document.getElementById("access_token").innerText;
     var userId = document.getElementById("user-id").innerText;
 
@@ -644,7 +697,10 @@ function AddSongsToMatchingPlaylist(playlistId, offset){
             if(limit == 100)
                 AddSongsToMatchingPlaylist(playlistId, offset + 100);
             else
-                $('#saved-message').show();
+            {
+                $('#saved-matching-message').show();
+                $('#save-matching-progress-status').hide();
+            }
         }
     });
 }

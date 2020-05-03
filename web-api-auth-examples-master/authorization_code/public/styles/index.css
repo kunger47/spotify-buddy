@@ -70,7 +70,9 @@ footer {
   display: none;
 }
 
-#get-songs, #filter-songs, #select-songs, #select-matching-songs, #playlist-progress-status, #song-progress-status, #playlist-song-progress-status {
+#get-songs, #filter-songs, #select-songs, #select-matching-songs, #playlist-progress-status, 
+#song-progress-status, #playlist-song-progress-status, #artist-progress-status, 
+#save-progress-status, #save-matching-progress-status {
   display: none;
 }
 
@@ -176,9 +178,10 @@ footer {
   -ms-overflow-style: none;
 }
 
-#saved-message {
+#saved-message, #updated-message, #saved-matching-message {
   display: none;
 }
+
 
 .slidecontainer {
   text-align: -webkit-center;

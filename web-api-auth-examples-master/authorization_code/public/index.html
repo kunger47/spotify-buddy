@@ -42,6 +42,10 @@
             <label for="downloading-playlist-songs">Gathering Playlist Songs </label>
             <progress id="downloading-playlist-songs" value="0" max="100"></progress>
           </div>
+          <div id="artist-progress-status">
+            <label for="downloading-artists">Gathering Some More Data</label>
+            <progress id="downloading-artists" value="0" max="100"></progress>
+          </div>
         </div>
 
         <div id="filter-songs">
@@ -120,10 +124,15 @@
           </div>
           <input id="playlist-name" placeholder="Enter Playlist Name">
           <button class="btn btn-default search-btn" id="save-songs-to-playlist">Save as Playlist</button>
+          <div id="saved-message">Successfully Saved Playlist to Your Account!</div>
+          <div id="updated-message">Successfully Updated Playlist!</div>
+          <div id="save-progress-status">
+            <label for="saving-playlist">Saving Playlist</label>
+            <progress id="saving-playlist" value="0" max="100"></progress>
+          </div>
           <div>
             <button class="btn btn-default search-btn" id="compare-user-data">Compare All Users Filtered Songs</button>
           </div>
-          <div id="saved-message">Successfully Saved Playlist to Your Account!</div>
         </div>
 
         <div id="select-matching-songs">
@@ -131,6 +140,11 @@
           <div id="matching-tracks"></div>
           <input id="matching-playlist-name" placeholder="Enter Playlist Name">
           <button class="btn btn-default search-btn" id="save-matching-songs-to-playlist">Save as Playlist</button>
+          <div id="save-matching-progress-status">
+            <label for="saving-matching-playlist">Saving Playlist</label>
+            <progress id="saving-matching-playlist" value="0" max="100"></progress>
+          </div>
+          <div id="saved-matching-message">Successfully Saved Playlist to Your Account!</div>
         </div>
 
         <div id="switch-accounts" >
