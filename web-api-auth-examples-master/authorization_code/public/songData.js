@@ -12,6 +12,7 @@ var allUsersSongs = [];     // Array of Arrays to be stored in local storage
 var matchingSongs = [];     // Array of 2 users matching songs
 var getSavedSongs = true;
 var displayedSongs = 0;
+var trackedUsers = [];
 
 var matchingTracksSource = document.getElementById('resulting-tracks-template').innerHTML,
     matchingTracksTemplate = Handlebars.compile(matchingTracksSource),
@@ -27,7 +28,10 @@ var playlistsSource = document.getElementById('resulting-playlists-template').in
 
 var filteredSongsLocalStorage = "filtered-songs";
 allUsersSongs = JSON.parse(sessionStorage.getItem(filteredSongsLocalStorage) || "[]");
-var userCount = allUsersSongs.length;
+
+var usersTrackedLocalStorage = "tracked-users";
+trackedUsers = JSON.parse(sessionStorage.getItem(usersTrackedLocalStorage) || "[]");
+var userCount = trackedUsers.length;
 
 //Getting Playlists
 document.getElementById('get_user_playlists').addEventListener('click', function() {
@@ -270,8 +274,20 @@ document.getElementById('filter-by-all').addEventListener('click', function() {
     RemoveExplicitSongs();
 
     DisplayFilteredSongs();
+    
     allUsersSongs[userCount] = filteredSongs.map(twoProperty("id", "uri"));
     sessionStorage.setItem(filteredSongsLocalStorage, JSON.stringify(allUsersSongs));
+    
+    trackedUsers[userCount] = document.getElementById("user-id").innerText;
+    sessionStorage.setItem(usersTrackedLocalStorage, JSON.stringify(trackedUsers));
+    
+    $('#user-count-message').html("Collected songs from " + trackedUsers[0] + " and " + trackedUsers[1] + ".");
+    
+    if(userCount > 0)
+    {
+        $('#compare-users').show();
+    }
+
     $('#select-songs').show();
 }, false);
 
@@ -700,6 +716,8 @@ function AddSongsToMatchingPlaylist(playlistId, offset){
             {
                 $('#saved-matching-message').show();
                 $('#save-matching-progress-status').hide();
+                sessionStorage.setItem(filteredSongsLocalStorage, "[]");
+                sessionStorage.setItem(usersTrackedLocalStorage, "[]");
             }
         }
     });

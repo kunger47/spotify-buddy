@@ -59,6 +59,11 @@ if (error) {
         });
         $('#login').show();
         $('#loggedin').hide();
+        if(JSON.parse(sessionStorage.getItem(usersTrackedLocalStorage) || "[]").length > 1)
+        {
+            sessionStorage.setItem(filteredSongsLocalStorage, "[]");
+            sessionStorage.setItem(usersTrackedLocalStorage, "[]");
+        }
     }, false);
     // document.getElementById('obtain-new-token').addEventListener('click', function() {
     //     $.ajax({

@@ -72,7 +72,7 @@ footer {
 
 #get-songs, #filter-songs, #select-songs, #select-matching-songs, #playlist-progress-status, 
 #song-progress-status, #playlist-song-progress-status, #artist-progress-status, 
-#save-progress-status, #save-matching-progress-status {
+#save-progress-status, #save-matching-progress-status, #compare-users {
   display: none;
 }
 

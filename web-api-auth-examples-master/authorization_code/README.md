@@ -34,7 +34,7 @@ Getting the Application
   - Open up your browser. Preferably Chrome.
   - Navigate to url localhost:8888
 
-  ### Take Note!
+## Take Note!
 
 - If you have Spotify set to Remember Me then when you click "Let's Do This", it will log you in immediately. If you want to log in another user. You must go to your Spotify account in your browser and log out before clicking "Lets Do This".
 - ALSO, this is annoying I know, but the matching songs across profiles functionality is very janky at the moment. If you want to use it you will have to do some work.
@@ -53,7 +53,7 @@ Getting the Application
   13. Click on "Compare All Users Filtered Songs".
   14. The filtered songs cannot be seen at this time for underlying issues that need to be resolved atm. But you can click "Save as Playlist" at the bottom of the page and you can see the songs that way.
 
-  ## Backlog
+## Backlog
 
 **Getting Song Data**
 
@@ -87,30 +87,30 @@ Getting the Application
   - [ ] Tempo
   - [ ] Valence (happy or sad)
   - [ ] Tempo, Mode, or Time_Signature
-- [ ] Artist popularity (artist's number of followers)
+  - [ ] Artist popularity (artist's number of followers)
 
 **Saving Filtered Songs**
 
-- [x] Sample a song (hoover over it)
-- [x] Remove a song from list (click it)
+  - [x] Sample a song (hoover over it)
+  - [x] Remove a song from list (click it)
 
-- [x] Save List of Filtered songs to playlist given a name
-- [x] Ability to add songs to already created playlist (when they enter a playlist name, if it matches a current one then add songs to that one if they are not on it already)
-- [ ] Ability to order filtered songs by various fields (title, artist, etc.)
+  - [x] Save List of Filtered songs to playlist given a name
+  - [x] Ability to add songs to already created playlist (when they enter a playlist name, if it matches a current one then add songs to that one if they are not on it already)
+  - [ ] Ability to order filtered songs by various fields (title, artist, etc.)
 
 **Compare Users Songs**
 
-- [x] Compare two users filtered song lists for matches
-- [x] Save this matching list of songs to a playlist (will save to the last user that signed in)
+  - [x] Compare two users filtered song lists for matches
+  - [x] Save this matching list of songs to a playlist (will save to the last user that signed in)
 
-- [ ] Allow users to specify how many songs they want in the resulting playlist (hence add more songs if they do not have enough in common)
-- [ ] Be able to compare any number of users
-- [ ] Create a playlist based on one users songs that another user might like
+  - [ ] Allow users to specify how many songs they want in the resulting playlist (hence add more songs if they do not have enough in common)
+  - [ ] Be able to compare any number of users
+  - [ ] Create a playlist based on one users songs that another user might like
 
 **Other Ideas**
 
-- [ ] Get a users top songs from various time spans, allow them to save this as a playlist
-- [ ] Create various graphs (mainly based on play history or when songs were added to playlists/saved songs)
+  - [ ] Get a users top songs from various time spans, allow them to save this as a playlist
+  - [ ] Create various graphs (mainly based on play history or when songs were added to playlists/saved songs)
   - [ ] Show your change of music taste over time (genres over time)
   - [ ] Select a song and create a line graph of your listens (to see when you listened to it the most and the least)
-- [ ] Allow user to ask for recommendations based on filtered songs
+  - [ ] Allow user to ask for recommendations based on filtered songs
